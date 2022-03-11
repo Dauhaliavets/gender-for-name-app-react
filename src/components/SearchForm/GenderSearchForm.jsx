@@ -1,75 +1,61 @@
-import { React, Component } from 'react';
+import React, { useState } from 'react';
 import Input from '../Input/Input';
 import Button from '../Button/Button';
 import Output from '../Output/Output';
 import './GenderSearchForm.css';
+// import { useState } from 'react/cjs/react.production.min';
 
 const serverUrl = 'https://api.genderize.io';
-export class GenderSearchForm extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			name: '',
-			gender: '',
-			isValid: false,
-		};
 
-		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleInputChange = this.handleInputChange.bind(this);
-		this.handleButtonClick = this.handleButtonClick.bind(this);
-		this.getData = this.getData.bind(this);
-	}
+export function GenderSearchForm(props) {
+	const [name, setName] = useState('');
+	const [gender, setGender] = useState('');
+	const [isValid, setIsValid] = useState(false);
 
-	handleSubmit(e) {
+	const handleSubmit = (e) => {
 		e.preventDefault();
-	}
+	};
 
-	handleInputChange(e) {
+	const handleInputChange = (e) => {
 		const value = e.target.value;
 		const isValid = value.length > 2 && value.length <= 10;
-		isValid
-			? this.setState({ isValid: isValid })
-			: this.setState({ isValid: isValid });
-		this.setState({ name: value });
-	}
+		setName(value);
+		setIsValid(isValid);
+	};
 
-	handleButtonClick() {
-		const url = `${serverUrl}?name=${this.state.name}`;
+	const handleButtonClick = () => {
+		const url = `${serverUrl}?name=${name}`;
 
-		if (this.state.isValid) {
-			this.getData(url);
+		if (isValid) {
+			getData(url);
 		}
-	}
+	};
 
-	getData(url) {
+	const getData = (url) => {
 		fetch(url)
 			.then((response) => response.json())
 			.then((data) => {
-				console.log(data)
-				this.setState({
-					gender: data.gender,
-				})
-			}
-			);
-	}
+				setGender(data.gender);
+			});
+	};
 
-	render() {
-		const { name, gender, isValid } = this.state;
-		const warning = (
-			<p className='validateInput'>
-				Имя может содержать не менее 3-х и не более 10-ти символов
-			</p>
-		);
+	const warning = (
+		<p className='validateInput'>
+			Имя может содержать не менее 3-х и не более 10-ти символов
+		</p>
+	);
 
-		return (
-			<div>
-				<form className='form' onSubmit={this.handleSubmit}>
-					<Input onChange={this.handleInputChange} placeholder={'Введите имя...'}/>
-					{!isValid && warning}
-					<Button onClick={this.handleButtonClick} name={'Поиск'} />
-				</form>
-				<Output name={name} gender={gender} />
-			</div>
-		);
-	}
+	return (
+		<div>
+			<form className='form' onSubmit={(e) => handleSubmit(e)}>
+				<Input
+					onChange={handleInputChange}
+					placeholder={'Введите имя...'}
+				/>
+				{!isValid && warning}
+				<Button onClick={handleButtonClick} name={'Поиск'} />
+			</form>
+			<Output name={name} gender={gender} />
+		</div>
+	);
 }
